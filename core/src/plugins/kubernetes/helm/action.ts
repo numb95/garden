@@ -24,7 +24,7 @@ import { makeDocsLink } from "../../../docs/common"
 export const getHelmDeployDocs = () => dedent`
   Specify a Helm chart (either in your repository or remote from a registry) to deploy.
 
-  Refer to the [Helm guide](${makeDocsLink`k8s-plugins/action-types/helm`}) for usage instructions.
+  Refer to the [Helm guide](${makeDocsLink`k8s-plugins/action-types/deploy/helm`}) for usage instructions.
 `
 
 export const helmDeployDefinition = (): DeployActionDefinition<HelmDeployAction> => ({
