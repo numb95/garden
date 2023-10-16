@@ -242,6 +242,7 @@ describe("actionConfigsToGraph", () => {
         explicit: true,
         kind: "Build",
         name: "foo",
+        type: "test",
         needsExecutedOutputs: false,
         needsStaticOutputs: false,
       },
@@ -289,6 +290,7 @@ describe("actionConfigsToGraph", () => {
       {
         explicit: true,
         kind: "Build",
+        type: "test",
         name: "foo",
         needsExecutedOutputs: false,
         needsStaticOutputs: false,
@@ -338,6 +340,7 @@ describe("actionConfigsToGraph", () => {
       {
         explicit: false,
         kind: "Build",
+        type: "test",
         name: "foo",
         fullRef: ["actions", "build", "foo", "version"],
         needsExecutedOutputs: false,
@@ -388,6 +391,7 @@ describe("actionConfigsToGraph", () => {
       {
         explicit: false,
         kind: "Build",
+        type: "test",
         name: "foo",
         fullRef: ["actions", "build", "foo", "outputs", "bar"],
         needsExecutedOutputs: true,
@@ -438,6 +442,7 @@ describe("actionConfigsToGraph", () => {
       {
         explicit: false,
         kind: "Build",
+        type: "container",
         name: "foo",
         fullRef: ["actions", "build", "foo", "outputs", "deploymentImageName"],
         needsExecutedOutputs: false,

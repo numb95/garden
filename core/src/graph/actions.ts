@@ -777,7 +777,21 @@ function dependenciesFromActionConfig(
   const deps: ActionDependency[] = config.dependencies.map((d) => {
     try {
       const { kind, name } = parseActionReference(d)
-      return { kind, name, explicit: true, needsExecutedOutputs: false, needsStaticOutputs: false }
+      const depKey = actionReferenceToString(d)
+      const depConfig = configsByKey[depKey]
+      if (!depConfig) {
+        throw new ConfigurationError({
+          message: `${description} references depdendency ${depKey}, but no such action could be found`,
+        })
+      }
+      return {
+        kind,
+        name,
+        type: depConfig.type,
+        explicit: true,
+        needsExecutedOutputs: false,
+        needsStaticOutputs: false,
+      }
     } catch (error) {
       throw new ValidationError({
         message: `Invalid dependency specified: ${error}`,
@@ -785,7 +799,7 @@ function dependenciesFromActionConfig(
     }
   })
 
-  function addDep(ref: ActionReference, attributes: ActionDependencyAttributes) {
+  function addDep(ref: ActionReference & { type: string }, attributes: ActionDependencyAttributes) {
     addActionDependency({ ...ref, ...attributes }, deps)
   }
 
@@ -802,7 +816,12 @@ function dependenciesFromActionConfig(
         })
       }
 
-      addDep(ref, { explicit: true, needsExecutedOutputs: false, needsStaticOutputs: false })
+      const refWithType = {
+        ...ref,
+        type: config.type,
+      }
+
+      addDep(refWithType, { explicit: true, needsExecutedOutputs: false, needsStaticOutputs: false })
     }
   } else if (config.build) {
     // -> build field on runtime actions
@@ -815,7 +834,11 @@ function dependenciesFromActionConfig(
       })
     }
 
-    addDep(ref, { explicit: true, needsExecutedOutputs: false, needsStaticOutputs: false })
+    const refWithType = {
+      ...ref,
+      type: config.type,
+    }
+    addDep(refWithType, { explicit: true, needsExecutedOutputs: false, needsStaticOutputs: false })
   }
 
   // Action template references in spec/variables
@@ -863,7 +886,12 @@ function dependenciesFromActionConfig(
       needsExecuted = true
     }
 
-    addDep(ref, { explicit: false, needsExecutedOutputs: needsExecuted, needsStaticOutputs: !needsExecuted })
+    const refWithType = {
+      ...ref,
+      type: refActionType,
+    }
+
+    addDep(refWithType, { explicit: false, needsExecutedOutputs: needsExecuted, needsStaticOutputs: !needsExecuted })
   }
 
   return deps
