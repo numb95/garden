@@ -24,6 +24,7 @@ Here's a simple example:
 apiVersion: garden.io/v1
 kind: Project
 name: my-project
+dotIgnoreFile: .gitignore
 
 environments: # <--- Every Garden project has one more environments
   - name: dev

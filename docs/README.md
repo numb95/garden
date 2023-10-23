@@ -60,7 +60,7 @@
   * [2. Login to the Garden Web Dashboard](./k8s-plugins/ephemeral-k8s/login-web-dashboard.md)
   * [3. Configure Ingress (optional)](./k8s-plugins/ephemeral-k8s/ingress.md)
   * [4. Retrieve Kubeconfig (optional)](./k8s-plugins/ephemeral-k8s/retrieve-kubeconfig.md)
-* [Action Configuration](./k8s-plugins/action-types/README.md)
+* [Actions](./k8s-plugins/action-types/README.md)
   * [Build](./k8s-plugins/action-types/build/README.md)
     * [Container](./k8s-plugins/action-types/build/container.md)
   * [Deploy](./k8s-plugins/action-types/deploy/README.md)
@@ -83,13 +83,13 @@
 
 * [About](./terraform-plugin/about.md)
 * [Plugin Configuration](./terraform-plugin/configure-provider.md)
-* [Action Configuration](./terraform-plugin/action-configuration.md)
+* [Actions](./terraform-plugin/action-configuration.md)
 
 ## ☘️ Pulumi Plugin
 
 * [About](./pulumi-plugin/about.md)
 * [Plugin Configuration](./pulumi-plugin/configure-provider.md)
-* [Action Configuration](./pulumi-plugin/action-configuration.md)
+* [Actions](./pulumi-plugin/action-configuration.md)
 
 ## 🌹 Other Plugins
 
