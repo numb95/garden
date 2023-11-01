@@ -7,7 +7,7 @@ configs:
     name: ${parent.name}-${inputs.name}
     include: []
     spec:
-      command: ["${inputs.value}"]
+      command: [echo, "echo-prefix", "${inputs.name}"]
   - kind: Deploy
     type: test
     name: ${parent.name}-${inputs.name}

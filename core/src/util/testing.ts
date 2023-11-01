@@ -12,9 +12,9 @@ import { isEqual, keyBy, set, mapValues, round } from "lodash"
 import { Garden, GardenOpts, GardenParams, GetConfigGraphParams, resolveGardenParams } from "../garden"
 import { DeepPrimitiveMap, StringMap } from "../config/common"
 import { ModuleConfig } from "../config/module"
-import { WorkflowConfig } from "../config/workflow"
+import { WorkflowConfig, WorkflowConfigMap } from "../config/workflow"
 import { Log, LogEntry } from "../logger/log-entry"
-import { GardenModule } from "../types/module"
+import { GardenModule, ModuleConfigMap } from "../types/module"
 import { findByName, getNames } from "./util"
 import { GardenError, InternalError } from "../exceptions"
 import { EventBus, EventName, Events } from "../events/events"
@@ -29,7 +29,7 @@ import { ConfigGraph } from "../graph/config-graph"
 import { SolveParams } from "../graph/solver"
 import { GraphResults } from "../graph/results"
 import { expect } from "chai"
-import { ActionConfig, ActionKind, ActionStatus } from "../actions/types"
+import { ActionConfig, ActionConfigMap, ActionKind, ActionStatus } from "../actions/types"
 import { WrappedActionRouterHandlers } from "../router/base"
 import {
   BuiltinArgs,
@@ -44,6 +44,7 @@ import { mkdirp, remove } from "fs-extra"
 import { GlobalConfigStore } from "../config-store/global"
 import { isPromise } from "./objects"
 import chalk from "chalk"
+import { ConfigTemplateConfig } from "../config/config-template"
 
 export class TestError extends GardenError {
   type = "_test"
@@ -164,9 +165,14 @@ export type TestGardenOpts = Partial<GardenOpts> & {
 
 export class TestGarden extends Garden {
   override events: TestEventBus
-  public override vcs!: VcsHandler // Not readonly, to allow overriding with a mocked handler in tests
-  public override secrets!: StringMap // Not readonly, to allow setting secrets in tests
-  public override variables!: DeepPrimitiveMap // Not readonly, to allow setting variables in tests
+  // Overriding the type declarations of a few instance variables to allow reassignment in test code.
+  public override actionConfigs!: ActionConfigMap
+  public override moduleConfigs!: ModuleConfigMap
+  public override workflowConfigs!: WorkflowConfigMap
+  public override configTemplates!: { [name: string]: ConfigTemplateConfig }
+  public override vcs!: VcsHandler
+  public override secrets!: StringMap
+  public override variables!: DeepPrimitiveMap
   private repoRoot!: string
   public cacheKey!: string
 

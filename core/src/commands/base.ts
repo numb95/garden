@@ -287,7 +287,6 @@ export abstract class Command<
     return withSessionContext({ sessionId, parentSessionId }, () =>
       wrapActiveSpan(this.getFullName(), async () => {
         const commandStartTime = new Date()
-        const server = this.server
 
         let garden = parentGarden
 
