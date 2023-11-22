@@ -169,6 +169,9 @@ export abstract class VcsHandler {
 
   abstract getRepoRoot(log: Log, path: string): Promise<string>
 
+  /**
+   * Abstract method for finding files in concrete Git repo scanning modes.
+   */
   abstract getFiles(params: GetFilesParams): Promise<VcsFile[]>
 
   abstract ensureRemoteSource(params: RemoteSourceParams): Promise<string>
