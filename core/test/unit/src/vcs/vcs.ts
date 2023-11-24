@@ -142,8 +142,8 @@ describe("VcsHandler", () => {
       })
 
       const version = await handler.getTreeVersion({
-        log: gardenA.log,
-        projectName: gardenA.projectName,
+        log: garden.log,
+        projectName: garden.projectName,
         config: moduleConfig,
       })
 
@@ -171,7 +171,10 @@ describe("VcsHandler", () => {
         config: moduleConfig,
       })
 
-      expect(version.files).to.eql([resolve(moduleConfig.path, "yes.txt")])
+      expect(version.files).to.eql([
+        resolve(moduleConfig.path, "included-dir", "yes.txt"),
+        resolve(moduleConfig.path, "yes.txt"),
+      ])
     })
 
     it("should respect both include and exclude fields, if specified", async () => {

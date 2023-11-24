@@ -1,0 +1,1 @@
+No! I'm in the excluded dir and I match the pattern "nope.*" exclusion pattern.

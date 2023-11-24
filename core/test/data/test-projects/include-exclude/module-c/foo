@@ -1,1 +1,1 @@
-bar
+This should be skipped because it's not specified explicitly in the `include:` config entry.

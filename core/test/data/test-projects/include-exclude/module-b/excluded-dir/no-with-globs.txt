@@ -1,0 +1,1 @@
+No! Always. I'm excluded by **/no-with-globs.txt, and I'm in the excluded dir.

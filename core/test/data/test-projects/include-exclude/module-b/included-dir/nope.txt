@@ -1,0 +1,1 @@
+No! I match the "nope.*" exclusion pattern by my filename.
