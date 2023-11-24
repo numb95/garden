@@ -267,12 +267,47 @@ export const commonGitHandlerTests = (handlerCls: new (params: VcsHandlerParams)
     })
 
     it("should filter out files that match the exclude filter, if specified", async () => {
-      const path = resolve(tmpPath, "foo.txt")
-      await createFile(path)
+      // matches file exclusion pattern -> should be excluded
+      const pathA1 = resolve(tmpPath, "foo.txt")
 
-      expect(
-        await handler.getFiles({ path: tmpPath, scanRoot: undefined, include: [], exclude: ["foo.*"], log })
-      ).to.eql([])
+      // doesn't match file exclusion pattern -> should pass
+      const pathA2 = resolve(tmpPath, "bar.txt")
+
+      // matches exclusion pattern filename and located in non-excluded dir -> should be excluded
+      const pathB1 = resolve(tmpPath, "dir/foo.txt")
+
+      // doesn't match file exclusion pattern in non-excluded dir -> should pass
+      const pathB2 = resolve(tmpPath, "dir/bar.txt")
+
+      // matches glob file exclusion pattern -> should be excluded
+      const pathB3 = resolve(tmpPath, "dir/ignored-by-glob.txt")
+
+      // both match directory exclusion pattern -> should be excluded despite the file exclusion pattern matching
+      const pathC1 = resolve(tmpPath, "ignored-dir/foo.log")
+      const pathC2 = resolve(tmpPath, "ignored-dir/bar.log")
+
+      await createFile(pathA1)
+      await createFile(pathA2)
+      await createFile(pathB1)
+      await createFile(pathB2)
+      await createFile(pathB3)
+      await createFile(pathC1)
+      await createFile(pathC2)
+
+      const files = await handler.getFiles({
+        path: tmpPath,
+        scanRoot: undefined,
+        include: undefined, // when include: [], getFiles() always returns an empty result
+        exclude: ["foo.*", "**/ignored-by-glob.txt", "ignored-dir"],
+        log,
+      })
+
+      const hashA2 = await getGitHash(git, pathA2)
+      const hashB2 = await getGitHash(git, pathB2)
+
+      expect(files.length).to.eql(2)
+      expect(files).to.deep.include({ path: pathA2, hash: hashA2 })
+      expect(files).to.deep.include({ path: pathB2, hash: hashB2 })
     })
 
     it("should respect include and exclude filters, if both are specified", async () => {
