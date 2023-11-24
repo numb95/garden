@@ -205,14 +205,13 @@ export class GitHandler extends VcsHandler {
     }
 
     const { log, path, pathDescription = "directory", filter, failOnPrompt = false } = params
-    const { absExcludes, augmentedExcludes, augmentedIncludes, exclude, hasIncludes, include } =
-      await getIncludeExcludeFiles(params)
+    const { absExcludes, augmentedExcludes, augmentedIncludes, hasIncludes } = await getIncludeExcludeFiles(params)
 
     const gitLog = log
       .createLog({ name: "git" })
       .debug(
-        `Scanning ${pathDescription} at ${path}\n  → Includes: ${include || "(none)"}\n  → Excludes: ${
-          exclude || "(none)"
+        `Scanning ${pathDescription} at ${path}\n  → Includes: ${augmentedIncludes || "(none)"}\n  → Excludes: ${
+          augmentedExcludes || "(none)"
         }`
       )
 
@@ -248,7 +247,7 @@ export class GitHandler extends VcsHandler {
     const lsFilesCommonArgs = ["--cached", "--exclude", this.gardenDirPath]
 
     if (!hasIncludes) {
-      for (const p of exclude) {
+      for (const p of augmentedExcludes) {
         lsFilesCommonArgs.push("--exclude", p)
       }
     }
@@ -368,7 +367,7 @@ export class GitHandler extends VcsHandler {
         return
       }
 
-      if (hasIncludes && !matchPath(filePath, undefined, exclude)) {
+      if (hasIncludes && !matchPath(filePath, undefined, augmentedExcludes)) {
         return
       }
 
@@ -429,7 +428,7 @@ export class GitHandler extends VcsHandler {
     if (this.ignoreFile) {
       args.push("--exclude-per-directory", this.ignoreFile)
     }
-    args.push(...(include || []))
+    args.push(...(augmentedIncludes || []))
 
     // Start git process
     gitLog.silly(() => `Calling git with args '${args.join(" ")}' in ${path}`)
