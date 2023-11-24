@@ -267,35 +267,85 @@ export const commonGitHandlerTests = (handlerCls: new (params: VcsHandlerParams)
     })
 
     it("should filter out files that match the exclude filter, if specified", async () => {
-      const path = resolve(tmpPath, "foo.txt")
-      await createFile(path)
+      // matches file exclusion pattern -> should be skipped
+      const pathA1 = resolve(tmpPath, "foo.txt")
 
-      expect(
-        await handler.getFiles({ path: tmpPath, scanRoot: undefined, include: [], exclude: ["foo.*"], log })
-      ).to.eql([])
+      // doesn't match file exclusion pattern -> should pass
+      const pathA2 = resolve(tmpPath, "bar.txt")
+
+      // doesn't match exclusion pattern because located in non-excluded dir -> should pass
+      const pathB1 = resolve(tmpPath, "dir/foo.txt")
+
+      // doesn't match file exclusion pattern in non-excluded dir -> should pass
+      const pathB2 = resolve(tmpPath, "dir/bar.txt")
+
+      // matches glob file exclusion pattern -> should be skipped
+      const pathB3 = resolve(tmpPath, "dir/ignore-me.txt")
+
+      // both match directory exclusion pattern -> should be skipped despite the file exclusion pattern matching
+      const pathC1 = resolve(tmpPath, "ignored-dir/foo.log")
+      const pathC2 = resolve(tmpPath, "ignored-dir/bar.log")
+
+      await createFile(pathA1)
+      await createFile(pathA2)
+      await createFile(pathB1)
+      await createFile(pathB2)
+      await createFile(pathB3)
+      await createFile(pathC1)
+      await createFile(pathC2)
+
+      const files = await handler.getFiles({
+        path: tmpPath,
+        scanRoot: undefined,
+        include: undefined, // when include: [], getFiles() always returns an empty result from
+        exclude: ["foo.*", "**/ignore-me.txt", "ignored-dir/"],
+        log,
+      })
+
+      const hashA2 = await getGitHash(git, pathA2)
+      const hashB1 = await getGitHash(git, pathB1)
+      const hashB2 = await getGitHash(git, pathB2)
+
+      expect(files.length).to.eql(3)
+      expect(files).to.deep.include({ path: pathA2, hash: hashA2 })
+      expect(files).to.deep.include({ path: pathB1, hash: hashB1 })
+      expect(files).to.deep.include({ path: pathB2, hash: hashB2 })
     })
 
     it("should respect include and exclude filters, if both are specified", async () => {
       const moduleDir = resolve(tmpPath, "module-a")
-      const pathA = resolve(moduleDir, "yes.txt")
-      const pathB = resolve(tmpPath, "no.txt")
-      const pathC = resolve(moduleDir, "yes.pass")
+      const pathA = resolve(moduleDir, "yes.txt") // should pass
+      const pathB = resolve(moduleDir, "yes.pass") // should pass
+      const pathC = resolve(tmpPath, "foo.txt") // should pass
+      const pathD = resolve(tmpPath, "no.txt") // should be excluded
+      const pathE = resolve(moduleDir, "excluded-dir/yes.txt") // should be excluded
+      const pathF = resolve(moduleDir, "excluded-dir/yes.pass") // should be excluded
+      const pathG = resolve(moduleDir, "excluded-dir/foo.txt") // should be excluded
+      const pathH = resolve(moduleDir, "excluded-dir/no.txt") // should be excluded
+
       await mkdir(moduleDir)
       await createFile(pathA)
       await createFile(pathB)
       await createFile(pathC)
+      await createFile(pathD)
+      await createFile(pathE)
+      await createFile(pathF)
+      await createFile(pathG)
+      await createFile(pathH)
 
       const files = (
         await handler.getFiles({
           path: tmpPath,
           include: ["module-a/**/*"],
-          exclude: ["**/*.txt"],
+          exclude: ["**/no.txt", "excluded-dir/"],
           log,
           scanRoot: undefined,
         })
       ).map((f) => f.path)
 
-      expect(files).to.eql([pathC])
+      console.log(`FILE PATHS: [${files.join(", ")}]`)
+
+      expect(files).to.eql([pathA, pathB, pathC])
     })
 
     it("should exclude untracked files that are listed in ignore file", async () => {
