@@ -1,5 +1,5 @@
 kind: Module
 name: module-c
 type: test
-include: ["*.txt"]
-exclude: ["nope.*"]
+include: ["*.txt", "included-dir/"]
+exclude: ["nope.*", "excluded-dir/", "**/no-with-globs.txt"]

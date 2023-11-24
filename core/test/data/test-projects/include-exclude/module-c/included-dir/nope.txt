@@ -1,0 +1,2 @@
+No!
+But Yes! :) I'm in the sub dir which is not excluded.

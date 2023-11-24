@@ -171,7 +171,11 @@ describe("VcsHandler", () => {
         config: moduleConfig,
       })
 
-      expect(version.files).to.eql([resolve(moduleConfig.path, "yes.txt")])
+      expect(version.files).to.eql([
+        resolve(moduleConfig.path, "included-dir", "nope.txt"),
+        resolve(moduleConfig.path, "included-dir", "yes.txt"),
+        resolve(moduleConfig.path, "yes.txt"),
+      ])
     })
 
     it("should respect both include and exclude fields, if specified", async () => {
@@ -193,7 +197,11 @@ describe("VcsHandler", () => {
         config: moduleConfig,
       })
 
-      expect(version.files).to.eql([resolve(moduleConfig.path, "yes.txt")])
+      expect(version.files).to.eql([
+        resolve(moduleConfig.path, "included-dir", "nope.txt"),
+        resolve(moduleConfig.path, "included-dir", "yes.txt"),
+        resolve(moduleConfig.path, "yes.txt"),
+      ])
     })
 
     it("should join the config's base path with source.path (if provided) when calling getFiles", async () => {
