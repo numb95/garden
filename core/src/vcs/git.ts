@@ -367,7 +367,8 @@ export class GitHandler extends VcsHandler {
         return
       }
 
-      if (hasIncludes && !matchPath(filePath, undefined, augmentedExcludes)) {
+      const passesExclusionFilter = matchPath(filePath, undefined, augmentedExcludes)
+      if (hasIncludes && !passesExclusionFilter) {
         return
       }
 
