@@ -210,6 +210,8 @@ export abstract class VcsHandler {
     force?: boolean
     scanRoot?: string
   }): Promise<TreeVersion> {
+    console.log(`Calling getTreeVersion() from ${this.name}`)
+
     const cacheKey = getResourceTreeCacheKey(config)
     const description = describeConfig(config)
 

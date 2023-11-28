@@ -56,6 +56,7 @@ export class GitRepoHandler extends GitHandler {
    * sub-path. This results in far fewer git process calls but in turn collects more data in memory.
    */
   override async getFiles(params: GetFilesParams): Promise<VcsFile[]> {
+    console.log(`Calling getFiles() from ${this.name}`)
     const { log, path, pathDescription, filter, failOnPrompt = false } = params
 
     if (params.include && params.include.length === 0) {
@@ -109,7 +110,9 @@ export class GitRepoHandler extends GitHandler {
       // but that caused issues with the glob matching on windows due to backslashes
       const relativePath = p.replace(`${path}${sep}`, "")
       log.silly(() => `Checking if ${relativePath} matches include/exclude globs`)
-      return matchPath(relativePath, augmentedIncludes, augmentedExcludes)
+      const res = matchPath(relativePath, augmentedIncludes, augmentedExcludes)
+      // console.log(`File ${relativePath} passes exclusions [${augmentedExcludes.join(", ")}]: ${res}`)
+      return res
     })
 
     log.debug(`Found ${filtered.length} files in module path after glob matching`)

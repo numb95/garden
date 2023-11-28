@@ -346,6 +346,7 @@ export class Garden {
     this.asyncLock = new AsyncLock()
 
     const gitMode = gardenEnv.GARDEN_GIT_SCAN_MODE || params.projectConfig.scan?.git?.mode
+    console.log(`GARDEN_GIT_SCAN_MODE: ${gitMode}`)
     const handlerCls = gitMode === "repo" ? GitRepoHandler : GitHandler
 
     this.vcs = new handlerCls({
@@ -1241,6 +1242,7 @@ export class Garden {
 
     const cacheContexts = [...moduleDependencies, moduleConfig].map((c: ModuleConfig) => getModuleCacheContext(c))
 
+    console.log(`Getting tree versiom with vcs handler ${this.vcs.name}`)
     const treeVersion = await this.vcs.getTreeVersion({
       log,
       projectName: this.projectName,

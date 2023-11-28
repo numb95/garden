@@ -190,6 +190,7 @@ export class GitHandler extends VcsHandler {
    * .ignore files, and the specified include/exclude filters.
    */
   override async getFiles(params: GetFilesParams): Promise<VcsFile[]> {
+    console.log(`Calling getFiles() from ${this.name}`)
     return this._getFiles(params)
   }
 
@@ -368,6 +369,7 @@ export class GitHandler extends VcsHandler {
       }
 
       const passesExclusionFilter = matchPath(filePath, undefined, augmentedExcludes)
+      // console.log(`File ${filePath} passes exclusions [${augmentedExcludes.join(", ")}]: ${passesExclusionFilter}`)
       if (!passesExclusionFilter) {
         return
       }

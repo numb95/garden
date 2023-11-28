@@ -88,6 +88,10 @@ export const commonGitHandlerTests = (handlerCls: new (params: VcsHandlerParams)
       ignoreFile: defaultIgnoreFilename,
       cache: garden.treeCache,
     })
+    console.log(`EXISTING GARDEN VcsHandler: ${garden.vcs.name} backed by ${garden.vcs.constructor.name}`)
+    console.log(`CONFIGURED TEST VscHandler: ${handler.name} backed by ${handlerCls.name}`)
+    garden.vcs = handler
+    console.log(`OVERRIDDEN GARDEN VcsHandler: ${garden.vcs.name} backed by ${garden.vcs.constructor.name}`)
     git = handler.gitCli(log, tmpPath)
   })
 
