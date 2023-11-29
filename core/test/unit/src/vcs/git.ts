@@ -23,6 +23,7 @@ import { uuidv4 } from "../../../../src/util/random.js"
 import type { VcsHandlerParams } from "../../../../src/vcs/vcs.js"
 import { repoRoot } from "../../../../src/util/testing.js"
 import { ChildProcessError, GardenError, RuntimeError } from "../../../../src/exceptions.js"
+import { sortBy } from "lodash-es"
 
 const { createFile, ensureSymlink, lstat, mkdir, mkdirp, realpath, remove, symlink, writeFile } = fsExtra
 
@@ -375,12 +376,84 @@ export const commonGitHandlerTests = (handlerCls: new (params: VcsHandlerParams)
 
       context("when only exclude filter is specified", () => {
         it("should filter out files that match the exclude filter", async () => {
-          const path = resolve(tmpPath, "foo.txt")
-          await createFile(path)
+          // matches file exclusion pattern -> should be excluded
+          const excludedByFilename = resolve(tmpPath, "foo.txt")
 
-          expect(
-            await handler.getFiles({ path: tmpPath, scanRoot: undefined, include: [], exclude: ["foo.*"], log })
-          ).to.eql([])
+          // matches glob exclusion pattern -> should be excluded
+          const excludedByGlobPattern = resolve(tmpPath, "excluded-by-glob.txt")
+
+          // doesn't match file exclusion pattern -> should be included
+          const notExcludedByFilename = resolve(tmpPath, "bar.txt")
+
+          const nonExcludedDirName = "dir"
+          const nonExcludedDirPath = resolve(tmpPath, nonExcludedDirName)
+          await mkdir(nonExcludedDirPath)
+
+          // matches exclusion pattern filename and located in non-excluded dir -> should be excluded
+          const excludedByFilenameNested = resolve(nonExcludedDirPath, "foo.txt")
+
+          // matches glob file exclusion pattern -> should be excluded
+          const excludedByGlobPatternNested = resolve(nonExcludedDirPath, "excluded-by-glob.txt")
+
+          // doesn't match file exclusion pattern in non-excluded dir -> should be included
+          const notExcludedNested = resolve(nonExcludedDirPath, "bar.txt")
+
+          // both match directory exclusion pattern -> should be excluded despite the file exclusion pattern matching
+          const excludedDirName = "excluded-dir"
+          const excludedDirPath = resolve(tmpPath, excludedDirName)
+          await mkdir(excludedDirPath)
+          const excludedByDirectory1 = resolve(excludedDirPath, "foo.txt")
+          const excludedByDirectory2 = resolve(excludedDirPath, "bar.txt")
+
+          // both match directory exclusion pattern -> should be excluded despite the file exclusion pattern matching
+          const excludedSubDirectoryName = "excluded-subdir"
+          const excludedSubDirectoryPath = resolve(nonExcludedDirPath, excludedSubDirectoryName)
+          await mkdir(excludedSubDirectoryPath)
+          const excludedBySubDirectory1 = resolve(excludedSubDirectoryPath, "foo.txt")
+          const excludedBySubDirectory2 = resolve(excludedSubDirectoryPath, "bar.txt")
+
+          // both match glob exclusion pattern -> should be excluded
+          const excludedSubDirectoryByGlobName = "excluded-subdir-by-glob"
+          const excludedSubDirectoryByGlobPath = resolve(nonExcludedDirPath, excludedSubDirectoryByGlobName)
+          await mkdir(excludedSubDirectoryByGlobPath)
+          const excludedBySubDirectoryGlob1 = resolve(excludedSubDirectoryByGlobPath, "foo.txt")
+          const excludedBySubDirectoryGlob2 = resolve(excludedSubDirectoryByGlobPath, "bar.txt")
+
+          await createFile(excludedByFilename)
+          await createFile(excludedByGlobPattern)
+          await createFile(notExcludedByFilename)
+          await createFile(excludedByFilenameNested)
+          await createFile(notExcludedNested)
+          await createFile(excludedByGlobPatternNested)
+          await createFile(excludedByDirectory1)
+          await createFile(excludedByDirectory2)
+          await createFile(excludedBySubDirectory1)
+          await createFile(excludedBySubDirectory2)
+          await createFile(excludedBySubDirectoryGlob1)
+          await createFile(excludedBySubDirectoryGlob2)
+
+          const files = await handler.getFiles({
+            path: tmpPath,
+            scanRoot: undefined,
+            include: undefined, // when include: [], getFiles() always returns an empty result
+            exclude: [
+              "foo.*",
+              "**/excluded-by-glob.txt",
+              excludedDirName,
+              excludedSubDirectoryName,
+              `**/${excludedSubDirectoryByGlobName}`,
+            ],
+            log,
+          })
+          const sortedFiles = sortBy(files, "path")
+
+          const expectedFiles = [
+            { path: notExcludedByFilename, hash: await getGitHash(git, notExcludedByFilename) },
+            { path: notExcludedNested, hash: await getGitHash(git, notExcludedNested) },
+          ]
+          const sortedExpectedFiles = sortBy(expectedFiles, "path")
+
+          expect(sortedFiles).to.eql(sortedExpectedFiles)
         })
       })
 
